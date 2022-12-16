@@ -1,8 +1,7 @@
--- Code Artifact: EECS 368 Assignment 7
 -- Description: This assignment defines the methods and other code needed to play the game of nim. The program
 -- prints the starting board, and the players take turns to removes stars from the rows until the game has ended.
 -- Inputs: The players need to input the row and number of stars they would like to remove for each of their turns.
--- Outputs: The game of nim is printed and player 1 and two take turns until the game is over. Once it has ended the
+-- Outputs: The game of nim is printed and player 1 and 2 take turns until the game is over. Once it has ended the
 -- winner is printed.
 -- Authors Name: Ojas Patil
 -- Creation Date: December 2, 2022
