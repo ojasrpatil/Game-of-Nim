@@ -1,0 +1,73 @@
+-- Code Artifact: EECS 368 Assignment 7
+-- Description: This assignment defines the methods and other code needed to play the game of nim. The program
+-- prints the starting board, and the players take turns to removes stars from the rows until the game has ended.
+-- Inputs: The players need to input the row and number of stars they would like to remove for each of their turns.
+-- Outputs: The game of nim is printed and player 1 and two take turns until the game is over. Once it has ended the
+-- winner is printed.
+-- Authors Name: Ojas Patil
+-- Creation Date: December 2, 2022
+
+
+import qualified Data.Sequence as Seq --imports the qualified data.sequence for the program to use
+import qualified Data.Foldable as Fol --imports the qualified data.foldable for the program to use
+import qualified Data.List as List --imports the qualified data.list for the program to use
+import Data.Maybe --imports the data.maybe for the program to use
+
+data Player = One | Two deriving (Show, Eq) --creates a player type that will take the turns in the game
+
+change :: Player -> Player --the method "change" is declared
+change One = Two --player one is changed to player two
+change Two = One --player two is changed to player one
+
+type Board = Seq.Seq Int --creates a new type: board
+
+startingBoard :: Board --the method "initialBoard" is declared
+startingBoard = Seq.fromList [5, 4, 3, 2, 1] --creates the starting board of stars
+
+
+move :: Board -> (Int, Int) -> Maybe Board --the method "move" is declared
+move board (row, stars) --the move for a player consists of picking the row and number of stars
+  | and [(Seq.index board row) >= stars, --returns the current board after the turn has been made
+          row < 5] = Just (Seq.adjust (\x -> x - stars) row board) --returns the board after the turn has been made
+  | otherwise = Nothing --if the player puts in something else that is not possible nothing happens
+
+
+display :: Board -> String --the method "display" is declared as a string
+display board = List.intercalate "\n" (zipWith (++) numbers (stars board)) --the following is used to display the board for the players
+                where numbers = ["1. ", "2. ", "3. ", "4. ", "5. "] --part of displaying the board
+                      stars board = [(concat . take n) (repeat "* ") --part of displaying the board
+                                    | n <- Fol.toList board] --part of displaying the board
+
+
+main :: IO () --the method "main" is declared for the IO
+main = nim --main is set to nim
+
+
+nim :: IO () --the method "nim" is declared to control the IO
+nim = do putStrLn (display startingBoard) --prints the starting board for the game
+         turn startingBoard One --starts player one's turn
+
+gameOver :: Board -> Player -> IO() --the method "gameOver" is declared
+gameOver board player = do if board == Seq.fromList [0, 0, 0, 0, 0] --if the board has no elements in it, then the game is over
+                           then putStrLn ("Congrats, Player " ++ (show player)++ ", you win!") --once the game has ended, it prints which player won
+                           else do putStrLn "" --if not then the game is continued
+                                   putStrLn (display board) --the board is displayed
+                                   turn board player --the next turn is given
+-- The turn method displays the player and asks for a movement, then checks if
+-- there was a problem performing that movement and continues the game. This is
+-- the main game loop
+turn :: Board -> Player -> IO () --the method "turn" is declared
+turn board player = do putStrLn ("\nPlayer " ++ (show player) ++ "'s Turn!") --prints which players turn it is
+                       putStrLn "Choose a row: " --tells the player to pick a row
+                       row <- getLine --the program goes to the row specified by the player
+                       putStrLn "Choose the number of stars to remove: " --tells the player to choose the amount of stars to remove from the row
+                       stars <- getLine --the program gets the stars chosen by the player
+                       let newBoard = move board ((read row) - 1, read stars) --the new board is created after the player has made their turn
+                       if newBoard == Nothing --checks if the players turn was invalid
+                         then do putStrLn "Not a valid move. Try Again." --if the turn was invalid then the following is printed
+                                 turn board player --gives the next player the turn
+                         else gameOver (fromJust newBoard) (change player) --if the game is over the gameOver method is called
+
+
+
+
